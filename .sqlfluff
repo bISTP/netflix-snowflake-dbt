@@ -1,0 +1,12 @@
+[sqlfluff]
+# Supported dialects: https://docs.sqlfluff.com/en/stable/dialects.html
+# e.g. snowflake, bigquery, redshift, postgres
+dialect = snowflake
+templater = dbt
+
+[sqlfluff:templater:dbt]
+project_dir = .
+
+[sqlfluff:rules:capitalisation.keywords]
+# Keywords should be upper case.
+capitalisation_policy = upper

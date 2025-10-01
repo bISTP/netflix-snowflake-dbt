@@ -1,0 +1,225 @@
+version: 2
+
+models:
+
+# Staging Models
+- name: src_movies
+  description: "Staging model for raw movies data loaded from the MovieLens dataset."
+  columns:
+    - name: movie_id
+      description: "Unique identifier for each movie consistent across datasets and MovieLens site."
+      tests:
+        - unique
+        - not_null
+    - name: title
+      description: "Full movie title including year of release."
+      tests:
+        - not_null
+    - name: genres
+      description: "Pipe-separated list of genres associated with the movie."
+      tests:
+        - not_null
+
+- name: src_ratings
+  description: "Staging model for raw ratings data from users."
+  columns:
+    - name: user_id
+      description: "Anonymized unique identifier for users consistent across ratings and tags."
+      tests:
+        - not_null
+    - name: movie_id
+      description: "Movie identifier linking rating to a movie."
+      tests:
+        - not_null
+    - name: rating
+      description: "User rating for the movie on a 0.5 to 5.0 scale."
+      tests:
+        - not_null
+    - name: timestamp
+      description: "UTC timestamp representing when the rating was made."
+      tests:
+        - not_null
+
+- name: src_tags
+  description: "Staging model for raw user-generated tags applied to movies."
+  columns:
+    - name: user_id
+      description: "User identifier consistent with ratings."
+      tests:
+        - not_null
+    - name: movie_id
+      description: "Movie identifier to which the tag applies."
+      tests:
+        - not_null
+    - name: tag
+      description: "Short phrase or single word tag created by users."
+      tests:
+        - not_null
+    - name: timestamp
+      description: "UTC timestamp when the tag was applied."
+      tests:
+        - not_null
+
+- name: src_links
+  description: "Staging model for external identifiers linking movies to IMDB and TMDB."
+  columns:
+    - name: movie_id
+      description: "MovieLens unique movie identifier."
+      tests:
+        - unique
+        - not_null
+    - name: imdb_id
+      description: "External IMDB identifier for the movie."
+    - name: tmdb_id
+      description: "External TMDB identifier for the movie."
+
+- name: src_genome_tags
+  description: "Staging model for tag descriptions in the genome dataset."
+  columns:
+    - name: tag_id
+      description: "Unique identifier for each tag in the genome."
+      tests:
+        - unique
+        - not_null
+    - name: tag
+      description: "Description or name of the tag."
+
+- name: src_genome_scores
+  description: "Staging model for movie-tag relevance scores from the genome."
+  columns:
+    - name: movie_id
+      description: "Movie identifier."
+      tests:
+        - not_null
+    - name: tag_id
+      description: "Tag identifier."
+      tests:
+        - not_null
+    - name: relevance
+      description: "Relevance score indicating how strongly a movie exhibits a tag property."
+      tests:
+        - not_null
+
+# Dimension Models
+- name: dim_movies
+  description: "Dimension table with cleansed and enriched movie metadata."
+  columns:
+    - name: movie_id
+      description: "Primary key for movies."
+      tests:
+        - unique
+        - not_null
+    - name: movie_title
+      description: "Standardized movie title with proper capitalization and trimming."
+      tests:
+        - not_null
+    - name: genre_array
+      description: "Array of genres parsed from raw genre string."
+
+- name: dim_users
+  description: "Dimension table listing distinct users from ratings and tags combined."
+  columns:
+    - name: user_id
+      description: "Unique identifier for each user, aggregated from ratings and tags."
+      tests:
+        - unique
+        - not_null
+
+- name: dim_genome_tags
+  description: "Dimension table for genome tag metadata."
+  columns:
+    - name: tag_id
+      description: "Primary key for genome tags."
+      tests:
+        - unique
+        - not_null
+    - name: tag_name
+      description: "Cleaned and standardized tag name."
+      tests:
+        - not_null
+
+# Fact Models
+- name: fct_genome_scores
+  description: "Fact table capturing relevance scores for movie-tag pairs."
+  columns:
+    - name: movie_id
+      description: "Foreign key referring to dim_movies."
+      tests:
+        - not_null
+        - relationships:
+            to: ref('dim_movies')
+            field: movie_id
+    - name: tag_id
+      description: "Foreign key referring to dim_genome_tags."
+      tests:
+        - not_null
+        - relationships:
+            to: ref('dim_genome_tags')
+            field: tag_id
+    - name: relevance_score
+      description: "Rounded relevance score greater than zero."
+      tests:
+        - not_null
+
+- name: fct_ratings
+  description: "Fact table recording user ratings on movies."
+  columns:
+    - name: user_id
+      description: "Foreign key referring to dim_users."
+      tests:
+        - not_null
+        - relationships:
+            to: ref('dim_users')
+            field: user_id
+    - name: movie_id
+      description: "Foreign key referring to dim_movies."
+      tests:
+        - not_null
+        - relationships:
+            to: ref('dim_movies')
+            field: movie_id
+    - name: rating
+      description: "Rating value provided by the user."
+      tests:
+        - not_null
+    - name: rating_timestamp
+      description: "Timestamp when the rating was given."
+      tests:
+        - not_null
+
+# Snapshot Models
+- name: snap_tags
+  description: "Snapshot model implementing SCD Type 2 for user tags."
+  columns:
+    - name: user_id
+      description: "User who applied the tag."
+      tests:
+        - not_null
+    - name: movie_id
+      description: "Movie associated with the tag."
+      tests:
+        - not_null
+    - name: tag
+      description: "User-generated tag content."
+      tests:
+        - not_null
+    - name: tag_timestamp
+      description: "Timestamp when tag was applied."
+      tests:
+        - not_null
+    - name: dbt_valid_from
+      description: "Start of validity period for this snapshot record."
+    - name: dbt_valid_to
+      description: "End of validity period for this snapshot record."
+
+# Seed Models
+- name: seed_movie_release_dates
+  description: "Static seed data providing movie release dates."
+  columns:
+    - name: movie_id
+      description: "Movie identifier."
+      tests:
+        - unique
+        - not_null
+    - name: release_date
+      description: "Official release date of the movie."
