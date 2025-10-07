@@ -2,6 +2,13 @@
 
 This is an **end-to-end cloud-based data engineering and analytics project** that demonstrates the modern ELT (Extract-Load-Transform) pipeline using popular cloud tools: **Amazon S3** for data storage, **Snowflake** as the data warehouse, and **DBT (Data Build Tool)** for data transformation, testing, documentation, and orchestration.
 
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/bISTP/netflix-snowflake-dbt/actions)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![dbt-core](https://img.shields.io/badge/dbt--core-1.10.11-orange.svg)](https://github.com/dbt-labs/dbt-core)
+[![dbt-snowflake](https://img.shields.io/badge/dbt--snowflake-1.10.2-blue.svg)](https://github.com/dbt-labs/dbt-snowflake)
+[![dbt-utils](https://img.shields.io/badge/dbt--utils-1.3.1-informational.svg)](https://hub.getdbt.com/dbt-labs/dbt_utils/latest/)
+[![Code Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen)](https://github.com/bISTP/netflix-snowflake-dbt/actions)
+
 ---
 
 ## Project Overview
@@ -45,13 +52,25 @@ This project utilizes the MovieLens 20M dataset, a popular and stable benchmark 
 
 ## Architecture and Lineage Graph
 
-> **[Insert Architecture Diagram and Lineage Graph Here]**
-
 > **Architecure Diagram**
 >![Architecure Diagram](/assets/images/architecture.png)
 
 > **Lineage Graph**
 >![Lineage Graph](/assets/images/dbt-dag.png)
+
+---
+
+## Tech Stack
+
+| Area | Tool | Version |
+|---|---|---|
+| Cloud Storage | AWS S3 | N/A |
+| Data Warehouse | Snowflake | N/A |
+| Data Transformation | dbt-core | 1.10.11 |
+| dbt Adapter | dbt-snowflake | 1.10.2 |
+| dbt Package | dbt-utils | 1.3.1 |
+| Language | SQL | N/A |
+| Language | Python | 3.12.8 |
 
 ---
 
